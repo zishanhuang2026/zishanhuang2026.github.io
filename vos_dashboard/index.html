@@ -1,1 +1,48 @@
-<!doctype html><meta charset="utf-8"><title>VOS Dashboard</title><p id="s">Loading VOS Dashboard...</p><script>(async()=>{try{if(!("DecompressionStream"in window))throw new Error("Use a current Chrome, Edge, Safari, or Firefox.");const urls=["chunks/v6_20260721_0.txt?v=20260721-v6d", "chunks/v6_20260721_1.txt?v=20260721-v6d", "chunks/v6_20260721_2.txt?v=20260721-v6d", "chunks/v6b_20260721_3a.txt?v=20260721-v6d", "chunks/v6d_20260721_3b1a.txt?v=20260721-v6d", "chunks/v6d_20260721_3b1b.txt?v=20260721-v6d", "chunks/v6c_20260721_3b2.txt?v=20260721-v6d", "chunks/v6_20260721_4.txt?v=20260721-v6d", "chunks/v6_20260721_5.txt?v=20260721-v6d"];const p=(await Promise.all(urls.map(u=>fetch(u).then(r=>{if(!r.ok)throw new Error("missing "+u);return r.text()})))).join("").replace(/\s/g,"");const b=atob(p),a=new Uint8Array(b.length);for(let i=0;i<b.length;i++)a[i]=b.charCodeAt(i);const t=await new Response(new Blob([a]).stream().pipeThrough(new DecompressionStream("gzip"))).text();document.open();document.write(t);document.close()}catch(e){document.getElementById("s").textContent="Dashboard failed to load: "+e.message}})();</script>
+<!doctype html>
+<meta charset="utf-8">
+<title>VOS Dashboard</title>
+<p id="s">Loading VOS Dashboard...</p>
+<script>
+(async () => {
+  try {
+    if (!("DecompressionStream" in window)) {
+      throw new Error("Use a current Chrome, Edge, Safari, or Firefox.");
+    }
+    const urls = [
+      "chunks/v6_20260721_0.txt?v=20260721-v7",
+      "chunks/v6_20260721_1.txt?v=20260721-v7",
+      "chunks/v6_20260721_2.txt?v=20260721-v7",
+      "chunks/v6b_20260721_3a.txt?v=20260721-v7",
+      "chunks/v6d_20260721_3b1a.txt?v=20260721-v7",
+      "chunks/v6d_20260721_3b1b.txt?v=20260721-v7",
+      "chunks/v6c_20260721_3b2.txt?v=20260721-v7",
+      "chunks/v6_20260721_4.txt?v=20260721-v7",
+      "chunks/v6_20260721_5.txt?v=20260721-v7"
+    ];
+    const payload = (await Promise.all(urls.map((url) => fetch(url).then((response) => {
+      if (!response.ok) throw new Error("missing " + url);
+      return response.text();
+    })))).join("").replace(/\s/g, "");
+    const binary = atob(payload);
+    const bytes = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i += 1) bytes[i] = binary.charCodeAt(i);
+    let html = await new Response(new Blob([bytes]).stream().pipeThrough(new DecompressionStream("gzip"))).text();
+
+    html = html
+      .replace(/grid-template-columns:\s*minmax\(230px,\s*1fr\)\s+minmax\(260px,\s*1fr\)\s+minmax\(360px,\s*1\.3fr\);/, "grid-template-columns: repeat(2, minmax(0, 1fr));")
+      .replace(/(\.summary-section\.cta-section\s*\{\s*)/, "$1\n      grid-column: 1 / -1;\n      ")
+      .replace(".summary-list .cta-card {", ".cta-section .cta-list {\n      grid-template-columns: repeat(2, minmax(280px, 1fr));\n    }\n    .summary-list .cta-card {")
+      .replace(".summary-controls { justify-content: stretch; }\n      .filebox { justify-content: stretch; }", ".summary-controls { justify-content: stretch; }\n      .cta-section .cta-list { grid-template-columns: 1fr; }\n      .filebox { justify-content: stretch; }")
+      .replace(/    \.priority \{[\s\S]*?    \.priority\.p2 \{[^\n]+\}\n/, "")
+      .replace("        const priority = document.createElement(\"span\");\n        priority.className = \"priority \" + item.priority.toLowerCase();\n        priority.textContent = item.priority;\n", "")
+      .replace("        meta.append(priority, count, negative);", "        meta.append(count, negative);")
+      .replace("        button.addEventListener(\"click\", () => showDetail(\"Call to Action：\" + item.issue, item.rows, \"所需帮助：\" + item.help + \"；优先级：\" + item.priority));", "        button.addEventListener(\"click\", () => showDetail(\"Call to Action：\" + item.issue, item.rows, \"所需帮助：\" + item.help + \"；相似问题：\" + item.count + \"条\"));");
+
+    document.open();
+    document.write(html);
+    document.close();
+  } catch (error) {
+    document.getElementById("s").textContent = "Dashboard failed to load: " + error.message;
+  }
+})();
+</script>
